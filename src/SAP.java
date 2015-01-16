@@ -34,8 +34,8 @@ public class SAP {
     }
 
     public int ancestor(int v, int w) {
-        if (v < 0 || v > graph.V() - 1) throw new NullPointerException();
-        if (w < 0 || w > graph.V() - 1) throw new NullPointerException();
+        if (v < 0 || v > graph.V() - 1) throw new IndexOutOfBoundsException();
+        if (w < 0 || w > graph.V() - 1) throw new IndexOutOfBoundsException();
         int min = -1;
         int ancestor = -1;
         BreadthFirstDirectedPaths sw = new BreadthFirstDirectedPaths(graph, w);
