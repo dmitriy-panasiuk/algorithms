@@ -1,6 +1,9 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
 
 public class WordNet {
     private List<String> synsetsList = new ArrayList<String>();
@@ -41,7 +44,7 @@ public class WordNet {
                 graph.addEdge(Integer.parseInt(data[0]), Integer.parseInt(data[i]));
             }
         }
-
+        sap = new SAP(graph);
     }
 
     public Iterable<String> nouns() {
@@ -55,16 +58,18 @@ public class WordNet {
 
     public int distance(String nounA, String nounB) {
         if (nounA == null || nounB == null) throw new NullPointerException();
+        if (nouns.get(nounA) == null || nouns.get(nounB) == null) throw new IllegalArgumentException();
         return sap.length(nouns.get(nounA), nouns.get(nounB));
     }
 
     public String sap(String nounA, String nounB) {
         if (nounA == null || nounB == null) throw new NullPointerException();
+        if (nouns.get(nounA) == null || nouns.get(nounB) == null) throw new IllegalArgumentException();
         return synsetsList.get(sap.ancestor(nouns.get(nounA), nouns.get(nounB)));
     }
 
     public static void main(String[] args) {
         WordNet wordNet = new WordNet("synsets.txt", "hypernyms.txt");
-        System.out.println();
+        System.out.println(wordNet.distance("ololo", "black_marlin"));
     }
 }
