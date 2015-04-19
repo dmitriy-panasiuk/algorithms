@@ -1,32 +1,58 @@
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BaseballElimination {
+    private int numberOfTeams;
+    private Map<String, Integer> teams = new HashMap<String, Integer>();
+    private int[] wins;
+    private int[] loses;
+    private int[] remaining;
+    private int[][] games;
+
     public BaseballElimination(String filename) {
-        throw new NotImplementedException();
+        In in = new In(filename);
+        numberOfTeams = in.readInt();
+
+        wins = new int[numberOfTeams];
+        loses = new int[numberOfTeams];
+        remaining = new int[numberOfTeams];
+        games = new int[numberOfTeams][numberOfTeams];
+
+        for (int i = 0; i < numberOfTeams; i++) {
+            teams.put(in.readString(), i);
+            wins[i] = in.readInt();
+            loses[i] = in.readInt();
+            remaining[i] = in.readInt();
+            for (int j = 0; j < numberOfTeams; j++) {
+                games[i][j] = in.readInt();
+            }
+        }
     }
 
     public int numberOfTeams() {
-        throw new NotImplementedException();
+        return this.numberOfTeams;
     }
 
     public Iterable<String> teams() {
-        throw new NotImplementedException();
+        return teams.keySet();
     }
 
     public int wins(String team) {
-        throw new NotImplementedException();
+        return wins[teams.get(team)];
     }
 
     public int losses(String team) {
-        throw new NotImplementedException();
+        return loses[teams.get(team)];
     }
 
     public int remaining(String team) {
-        throw new NotImplementedException();
+        return remaining[teams.get(team)];
     }
 
     public int against(String team1, String team2) {
-        throw new NotImplementedException();
+        return games[teams.get(team1)][teams.get(team2)];
     }
 
     public boolean isEliminated(String team) {
@@ -35,5 +61,11 @@ public class BaseballElimination {
 
     public Iterable<String> certificateOfElimination(String team) {
         throw new NotImplementedException();
+    }
+
+    public static void main(String[] args) {
+        BaseballElimination b = new BaseballElimination("teams4.txt");
+        System.out.println(b.wins("New_York"));
+        System.out.println(b.against("Atlanta", "New_York"));
     }
 }
