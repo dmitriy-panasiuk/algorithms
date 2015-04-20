@@ -57,21 +57,62 @@ public class BaseballElimination {
 
     public boolean isEliminated(String team) {
         int teamIndex = teams.get(team);
-        for (int i = 0; i < numberOfTeams; i++) {
-            if (wins[teamIndex] + remaining[teamIndex] < wins[i]) {
+        int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
+        int vertices = pairs + 2 + numberOfTeams - 1;
+        int i = 0, j, k = 1;
+        for (int ii = 0; ii < numberOfTeams; ii++) {
+            if (wins[teamIndex] + remaining[teamIndex] < wins[ii]) {
                 return true;
             }
         }
 
-        FlowNetwork network = new FlowNetwork((numberOfTeams * numberOfTeams - numberOfTeams) / 2 + 2 + numberOfTeams);
-        for (int i = 1; i <= (numberOfTeams * numberOfTeams - numberOfTeams) / 2; i++) {
-            network.addEdge(new FlowEdge(0, i, 0.0));
+        FlowNetwork network = new FlowNetwork(vertices);
+
+        while (i < numberOfTeams) {
+            if (i == teamIndex) {
+                i++;
+                continue;
+            }
+            j = 0;
+            while (j < numberOfTeams) {
+                if (j == teamIndex) {
+                    j++;
+                    continue;
+                }
+                if (i >= j) {
+                    j++;
+                    continue;
+                }
+                network.addEdge(new FlowEdge(0, k, games[i][j]));
+                network.addEdge(new FlowEdge(k, getTeamIndex(teamIndex, i), Double.POSITIVE_INFINITY));
+                network.addEdge(new FlowEdge(k, getTeamIndex(teamIndex, j), Double.POSITIVE_INFINITY));
+                k++;
+                j++;
+            }
+            i++;
         }
+
+        for (int jj = pairs + 1; jj < vertices - 1; jj++) {
+            network.addEdge(new FlowEdge(jj, vertices - 1, wins[teamIndex] + remaining[teamIndex] - wins[getTeamIndexReverse(jj, teamIndex)]));
+        }
+
         return false;
     }
 
-    private double gameCapacity(int n) {
+    private int getTeamIndex(int teamIndex, int index) {
+        int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
+        if (index < teamIndex) {
+            return pairs + index + 1;
+        }
+        return pairs + index;
+    }
 
+    private int getTeamIndexReverse(int index, int teamIndex) {
+        int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
+        if (index - pairs - 1 >= teamIndex) {
+            return index - pairs;
+        }
+        return index - pairs - 1;
     }
 
     public Iterable<String> certificateOfElimination(String team) {
@@ -79,8 +120,8 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination b = new BaseballElimination("teams4.txt");
+        BaseballElimination b = new BaseballElimination("teams5.txt");
         System.out.println(b.wins("New_York"));
-        System.out.println(b.isEliminated("New_York"));
+        System.out.println(b.isEliminated("Detroit"));
     }
 }
