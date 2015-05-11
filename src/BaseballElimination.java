@@ -96,6 +96,9 @@ public class BaseballElimination {
             network.addEdge(new FlowEdge(jj, vertices - 1, wins[teamIndex] + remaining[teamIndex] - wins[getTeamIndexReverse(jj, teamIndex)]));
         }
 
+        FordFulkerson ff = new FordFulkerson(network, 0, vertices - 1);
+
+
         return false;
     }
 
@@ -122,6 +125,6 @@ public class BaseballElimination {
     public static void main(String[] args) {
         BaseballElimination b = new BaseballElimination("teams5.txt");
         System.out.println(b.wins("New_York"));
-        System.out.println(b.isEliminated("Detroit"));
+        System.out.println(b.isEliminated("Baltimore"));
     }
 }
