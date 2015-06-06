@@ -1,11 +1,16 @@
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BaseballElimination {
     private int numberOfTeams;
+    private boolean isEliminated;
+    FordFulkerson ff;
     private Map<String, Integer> teams = new HashMap<String, Integer>();
+    private String[] teamNames;
     private int[] wins;
     private int[] loses;
     private int[] remaining;
@@ -13,15 +18,19 @@ public class BaseballElimination {
 
     public BaseballElimination(String filename) {
         In in = new In(filename);
+        String name;
         numberOfTeams = in.readInt();
 
+        teamNames = new String[numberOfTeams];
         wins = new int[numberOfTeams];
         loses = new int[numberOfTeams];
         remaining = new int[numberOfTeams];
         games = new int[numberOfTeams][numberOfTeams];
 
         for (int i = 0; i < numberOfTeams; i++) {
-            teams.put(in.readString(), i);
+            name = in.readString();
+            teamNames[i] = name;
+            teams.put(name, i);
             wins[i] = in.readInt();
             loses[i] = in.readInt();
             remaining[i] = in.readInt();
@@ -96,8 +105,13 @@ public class BaseballElimination {
             network.addEdge(new FlowEdge(jj, vertices - 1, wins[teamIndex] + remaining[teamIndex] - wins[getTeamIndexReverse(jj, teamIndex)]));
         }
 
-        FordFulkerson ff = new FordFulkerson(network, 0, vertices - 1);
+        ff = new FordFulkerson(network, 0, vertices - 1);
 
+        for (FlowEdge edge : network.adj(0)) {
+            if (edge.flow() != edge.capacity()) {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -119,12 +133,24 @@ public class BaseballElimination {
     }
 
     public Iterable<String> certificateOfElimination(String team) {
-        throw new NotImplementedException();
+        List<String> result = new ArrayList<String>();
+        int teamIndex = teams.get(team);
+        if (isEliminated(team)) {
+            for (int i = 1; i < numberOfTeams; i++) {
+                if (ff.inCut(i)) {
+                    result.add(teamNames[getTeamIndexReverse(i, teamIndex)]);
+                }
+            }
+        } else {
+            return null;
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {
         BaseballElimination b = new BaseballElimination("teams5.txt");
-        System.out.println(b.wins("New_York"));
-        System.out.println(b.isEliminated("Baltimore"));
+        //System.out.println(b.isEliminated("Detroit"));
+        System.out.println(b.certificateOfElimination("Detroit"));
     }
 }
