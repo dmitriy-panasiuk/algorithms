@@ -1,3 +1,7 @@
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.Queue;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -130,12 +134,5 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-        /*In in = new In("digraph1.txt");
-        Digraph G = new Digraph(in);
-        SAP sap = new SAP(G);
-        Integer[] a = new Integer[]{7, 2};
-        Integer[] b = new Integer[]{4, 5};
-        System.out.println(sap.length(Arrays.asList(a), Arrays.asList(b)));
-        System.out.println(sap.ancestor(1, 6));*/
     }
 }

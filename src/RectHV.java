@@ -1,10 +1,12 @@
+import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.StdDraw;
+
 /*************************************************************************
- *  Compilation:  javac RectHV.java
- *  Execution:    java RectHV
- *  Dependencies: Point2D.java
- *
- *  Implementation of 2D axis-aligned rectangle.
- *
+ * Compilation:  javac RectHV.java
+ * Execution:    java RectHV
+ * Dependencies: Point2D.java
+ * <p/>
+ * Implementation of 2D axis-aligned rectangle.
  *************************************************************************/
 
 public class RectHV {
@@ -23,14 +25,30 @@ public class RectHV {
     }
 
     // accessor methods for 4 coordinates
-    public double xmin() { return xmin; }
-    public double ymin() { return ymin; }
-    public double xmax() { return xmax; }
-    public double ymax() { return ymax; }
+    public double xmin() {
+        return xmin;
+    }
+
+    public double ymin() {
+        return ymin;
+    }
+
+    public double xmax() {
+        return xmax;
+    }
+
+    public double ymax() {
+        return ymax;
+    }
 
     // width and height of rectangle
-    public double width()  { return xmax - xmin; }
-    public double height() { return ymax - ymin; }
+    public double width() {
+        return xmax - xmin;
+    }
+
+    public double height() {
+        return ymax - ymin;
+    }
 
     // does this axis-aligned rectangle intersect that one?
     public boolean intersects(RectHV that) {
@@ -54,11 +72,11 @@ public class RectHV {
     // distance squared from p to closest point on this axis-aligned rectangle
     public double distanceSquaredTo(Point2D p) {
         double dx = 0.0, dy = 0.0;
-        if      (p.x() < xmin) dx = p.x() - xmin;
+        if (p.x() < xmin) dx = p.x() - xmin;
         else if (p.x() > xmax) dx = p.x() - xmax;
-        if      (p.y() < ymin) dy = p.y() - ymin;
+        if (p.y() < ymin) dy = p.y() - ymin;
         else if (p.y() > ymax) dy = p.y() - ymax;
-        return dx*dx + dy*dy;
+        return dx * dx + dy * dy;
     }
 
     // does this axis-aligned rectangle contain p?
