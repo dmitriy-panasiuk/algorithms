@@ -135,8 +135,10 @@ public class BaseballElimination {
     public Iterable<String> certificateOfElimination(String team) {
         List<String> result = new ArrayList<String>();
         int teamIndex = teams.get(team);
+        int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
+        int vertices = pairs + 2 + numberOfTeams - 1;
         if (isEliminated(team)) {
-            for (int i = 1; i < numberOfTeams; i++) {
+            for (int i = pairs + 1; i < vertices - 1; i++) {
                 if (ff.inCut(i)) {
                     result.add(teamNames[getTeamIndexReverse(i, teamIndex)]);
                 }
