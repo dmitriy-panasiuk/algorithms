@@ -8,7 +8,6 @@ public class Board {
     public Board(int[][] blocks) {
         this.dimension = blocks.length;
         this.blocks = arraycopy(blocks);
-
     }
 
     public int dimension() {
