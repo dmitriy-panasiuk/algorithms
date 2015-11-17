@@ -1,8 +1,33 @@
+import edu.princeton.cs.algs4.Picture;
+
+import java.awt.Color;
+
 public class SeamCarver {
     private Picture picture;
+    private Color[][] colors;
+    private double[][] energies;
 
     public SeamCarver(Picture picture) {
         this.picture = new Picture(picture);
+        this.colors = new Color[picture.width()][picture.height()];
+        this.energies = new double[picture.width()][picture.height()];
+
+        for (int i = 0; i < picture.width(); i++) {
+            for (int j = 0; j < picture.height(); j++) {
+                Color currentColor = picture.get(i, j);
+                colors[i][j] = new Color(currentColor.getRed(), currentColor.getGreen(), currentColor.getBlue());
+            }
+        }
+
+        for (int i = 0; i < picture.width(); i++) {
+            for (int j = 0; j < picture.height(); j++) {
+                if (i == 0 || j == 0 || i == picture.width() - 1 || j == picture.height() - 1) {
+                    energies[i][j] = 1000.0;
+                } else {
+                    energies[i][j] = Math.sqrt(gradientX(i, j) + gradientY(i, j));
+                }
+            }
+        }
     }
 
     public Picture picture() {
@@ -18,25 +43,11 @@ public class SeamCarver {
     }
 
     public double energy(int x, int y) {
-        double gX, gY;
-        if (x < 0 || x >= width()) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (y < 0 || y >= height()) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (x == 0 || y == 0 || x == width() - 1 || y == height() - 1) {
-            return 195075.0;
-        }
-        gX = gradientX(x, y);
-        gY = gradientY(x, y);
-
-        return gX + gY;
+        return this.energies[x][y];
     }
 
     private double gradientX(int x, int y) {
-        double dR = Math.abs(picture.get(x - 1, y).getRed() - picture.get(x + 1, y).getRed());
+        double dR = Math.abs(colors[x - 1][y].getRed() - colors[x + 1][y].getRed());
         double dG = Math.abs(picture.get(x - 1, y).getGreen() - picture.get(x + 1, y).getGreen());
         double dB = Math.abs(picture.get(x - 1, y).getBlue() - picture.get(x + 1, y).getBlue());
 
@@ -78,10 +89,10 @@ public class SeamCarver {
     }
 
     public static void main(String[] args) {
-        Picture p = new Picture("6x5.png");
+        Picture p = new Picture("3x4.png");
         SeamCarver s = new SeamCarver(p);
-        int x = 4, y = 4;
-        System.out.println(p.get(x,y).getRed() + " " + p.get(x,y).getGreen() + " " + p.get(x,y).getBlue());
-        System.out.println(s.energy(x,y));
+        int x = 1, y = 2;
+        System.out.println(p.get(x, y).getRed() + " " + p.get(x, y).getGreen() + " " + p.get(x, y).getBlue());
+        System.out.println(s.energy(x, y));
     }
 }
