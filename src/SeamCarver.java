@@ -6,22 +6,28 @@ public class SeamCarver {
     private Picture picture;
     private Color[][] colors;
     private double[][] energies;
+    private int width;
+    private int height;
 
     public SeamCarver(Picture picture) {
-        this.picture = new Picture(picture);
-        this.colors = new Color[picture.width()][picture.height()];
-        this.energies = new double[picture.width()][picture.height()];
+        if (picture == null) throw new NullPointerException();
 
-        for (int i = 0; i < picture.width(); i++) {
-            for (int j = 0; j < picture.height(); j++) {
+        this.picture = new Picture(picture);
+        this.width = picture.width();
+        this.height = picture.height();
+        this.colors = new Color[this.width][this.height()];
+        this.energies = new double[this.width][this.height()];
+
+        for (int i = 0; i < this.width; i++) {
+            for (int j = 0; j < this.height; j++) {
                 Color currentColor = picture.get(i, j);
                 colors[i][j] = new Color(currentColor.getRed(), currentColor.getGreen(), currentColor.getBlue());
             }
         }
 
-        for (int i = 0; i < picture.width(); i++) {
-            for (int j = 0; j < picture.height(); j++) {
-                if (i == 0 || j == 0 || i == picture.width() - 1 || j == picture.height() - 1) {
+        for (int i = 0; i < this.width; i++) {
+            for (int j = 0; j < this.height; j++) {
+                if (i == 0 || j == 0 || i == this.width - 1 || j == this.height - 1) {
                     energies[i][j] = 1000.0;
                 } else {
                     energies[i][j] = Math.sqrt(gradientX(i, j) + gradientY(i, j));
@@ -35,11 +41,11 @@ public class SeamCarver {
     }
 
     public int width() {
-        return this.picture.width();
+        return this.width;
     }
 
     public int height() {
-        return this.picture.height();
+        return this.height;
     }
 
     public double energy(int x, int y) {
