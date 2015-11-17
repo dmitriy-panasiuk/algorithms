@@ -1,3 +1,7 @@
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.Queue;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -6,25 +10,30 @@ public class SAP {
 
     public SAP(Digraph G) {
         if (G == null) throw new NullPointerException();
+
         this.graph = new Digraph(G);
     }
 
     public int length(int v, int w) {
         if (v < 0 || v > graph.V() - 1) throw new IndexOutOfBoundsException();
         if (w < 0 || w > graph.V() - 1) throw new IndexOutOfBoundsException();
+
         int min = -1;
         BreadthFirstDirectedPaths sw = new BreadthFirstDirectedPaths(graph, w);
         BreadthFirstDirectedPaths sv = new BreadthFirstDirectedPaths(graph, v);
-        Queue<Integer> vertices = new Queue<Integer>();
-        Set<Integer> visited = new HashSet<Integer>();
+        Queue<Integer> vertices = new Queue<>();
+        Set<Integer> visited = new HashSet<>();
+
         vertices.enqueue(v);
         while (!vertices.isEmpty()) {
             int vertex = vertices.dequeue();
             visited.add(vertex);
             if (sw.hasPathTo(vertex)) {
-                if (min == -1) min = sw.distTo(vertex) + sv.distTo(vertex);
-                else if (sw.distTo(vertex) + sv.distTo(vertex) < min) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                int dist = sw.distTo(vertex) + sv.distTo(vertex);
+                if (min == -1) {
+                    min = dist;
+                } else if (dist < min) {
+                    min = dist;
                 }
             }
             for (int adj : graph.adj(vertex)) {
@@ -38,22 +47,25 @@ public class SAP {
     public int ancestor(int v, int w) {
         if (v < 0 || v > graph.V() - 1) throw new IndexOutOfBoundsException();
         if (w < 0 || w > graph.V() - 1) throw new IndexOutOfBoundsException();
+
         int min = -1;
         int ancestor = -1;
         BreadthFirstDirectedPaths sw = new BreadthFirstDirectedPaths(graph, w);
         BreadthFirstDirectedPaths sv = new BreadthFirstDirectedPaths(graph, v);
-        Queue<Integer> vertices = new Queue<Integer>();
-        Set<Integer> visited = new HashSet<Integer>();
+        Queue<Integer> vertices = new Queue<>();
+        Set<Integer> visited = new HashSet<>();
+
         vertices.enqueue(v);
         while (!vertices.isEmpty()) {
             int vertex = vertices.dequeue();
             visited.add(vertex);
             if (sw.hasPathTo(vertex)) {
+                int dist = sw.distTo(vertex) + sv.distTo(vertex);
                 if (min == -1) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                    min = dist;
                     ancestor = vertex;
-                } else if (sw.distTo(vertex) + sv.distTo(vertex) < min) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                } else if (dist < min) {
+                    min = dist;
                     ancestor = vertex;
                 }
             }
@@ -67,11 +79,13 @@ public class SAP {
 
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
         if (v == null || w == null) throw new NullPointerException();
+
         int min = -1;
         BreadthFirstDirectedPaths sw = new BreadthFirstDirectedPaths(graph, w);
         BreadthFirstDirectedPaths sv = new BreadthFirstDirectedPaths(graph, v);
-        Queue<Integer> vertices = new Queue<Integer>();
-        Set<Integer> visited = new HashSet<Integer>();
+        Queue<Integer> vertices = new Queue<>();
+        Set<Integer> visited = new HashSet<>();
+
         for (int vertex : v) {
             vertices.enqueue(vertex);
             visited.add(vertex);
@@ -79,9 +93,11 @@ public class SAP {
         while (!vertices.isEmpty()) {
             int vertex = vertices.dequeue();
             if (sw.hasPathTo(vertex)) {
-                if (min == -1) min = sw.distTo(vertex) + sv.distTo(vertex);
-                else if (sw.distTo(vertex) + sv.distTo(vertex) < min) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                int dist = sw.distTo(vertex) + sv.distTo(vertex);
+                if (min == -1) {
+                    min = dist;
+                } else if (dist < min) {
+                    min = dist;
                 }
             }
             for (int adj : graph.adj(vertex)) {
@@ -97,12 +113,14 @@ public class SAP {
 
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
         if (v == null || w == null) throw new NullPointerException();
+
         int min = -1;
         int ancestor = -1;
         BreadthFirstDirectedPaths sw = new BreadthFirstDirectedPaths(graph, w);
         BreadthFirstDirectedPaths sv = new BreadthFirstDirectedPaths(graph, v);
-        Queue<Integer> vertices = new Queue<Integer>();
-        Set<Integer> visited = new HashSet<Integer>();
+        Queue<Integer> vertices = new Queue<>();
+        Set<Integer> visited = new HashSet<>();
+
         for (int vertex : v) {
             vertices.enqueue(vertex);
             visited.add(vertex);
@@ -110,11 +128,12 @@ public class SAP {
         while (!vertices.isEmpty()) {
             int vertex = vertices.dequeue();
             if (sw.hasPathTo(vertex)) {
+                int dist = sw.distTo(vertex) + sv.distTo(vertex);
                 if (min == -1) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                    min = dist;
                     ancestor = vertex;
-                } else if (sw.distTo(vertex) + sv.distTo(vertex) < min) {
-                    min = sw.distTo(vertex) + sv.distTo(vertex);
+                } else if (dist < min) {
+                    min = dist;
                     ancestor = vertex;
                 }
             }
@@ -130,12 +149,5 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-        /*In in = new In("digraph1.txt");
-        Digraph G = new Digraph(in);
-        SAP sap = new SAP(G);
-        Integer[] a = new Integer[]{7, 2};
-        Integer[] b = new Integer[]{4, 5};
-        System.out.println(sap.length(Arrays.asList(a), Arrays.asList(b)));
-        System.out.println(sap.ancestor(1, 6));*/
     }
 }

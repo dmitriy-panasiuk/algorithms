@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.Point2D;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
