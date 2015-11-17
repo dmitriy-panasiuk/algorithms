@@ -48,7 +48,22 @@ public class WordNet {
                 graph.addEdge(Integer.parseInt(data[0]), Integer.parseInt(data[i]));
             }
         }
+        if (!hasRoots(graph)) {
+            throw new IllegalArgumentException();
+        }
         sap = new SAP(graph);
+    }
+
+    private boolean hasRoots(Digraph digraph) {
+        int rootNumber = 0;
+
+        for (int i = 0; i < digraph.V(); i++) {
+            if (digraph.outdegree(i) == 0) {
+                rootNumber++;
+            }
+        }
+
+        return rootNumber == 1;
     }
 
     public Iterable<String> nouns() {
@@ -76,7 +91,6 @@ public class WordNet {
     }
 
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("synsets.txt", "hypernyms.txt");
-        System.out.println(wordNet.distance("ololo", "black_marlin"));
+
     }
 }
