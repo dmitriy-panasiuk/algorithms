@@ -69,11 +69,68 @@ public class SeamCarver {
     }
 
     public int[] findHorizontalSeam() {
-        throw new UnsupportedOperationException();
+        double[][] paths = new double[width()][height()];
+        double min = Double.POSITIVE_INFINITY;
+        int indexMin = 0;
+        int[] result = new int[width()];
+
+        for (int x = 0; x < width(); x++) {
+            for (int y = 0; y < height(); y++) {
+                if (x == 0) {
+                    paths[x][y] = energies[x][y];
+                } else {
+                    if (y == 0) {
+                        paths[x][y] = energies[x][y] + Math.min(paths[x - 1][y], paths[x - 1][y + 1]);
+                    } else if (y == height() - 1) {
+                        paths[x][y] = energies[x][y] + Math.min(paths[x - 1][y], paths[x - 1][y - 1]);
+                    } else {
+                        paths[x][y] = energies[x][y] + smallestOfThree(paths[x - 1][y - 1], paths[x - 1][y], paths[x - 1][y + 1]);
+                    }
+                }
+            }
+        }
+
+        for (int y = 0; y < height(); y++) {
+            if (paths[width()-1][y] <= min) {
+                min = paths[width()-1][y];
+                indexMin = y;
+            }
+        }
+        result[width() - 1] = indexMin;
+        for (int x = width() - 2; x >= 0; x--) {
+            int currentMin = result[x + 1];
+            if (currentMin == 0) {
+                result[x] = indexYOfSmallestElement(paths, x, currentMin, currentMin + 1);
+            } else if (currentMin == width() - 1) {
+                result[x] = indexYOfSmallestElement(paths, x, currentMin - 1, currentMin);
+            } else {
+                result[x] = indexYOfSmallestElement(paths, x, currentMin - 1, currentMin, currentMin + 1);
+            }
+        }
+
+        return result;
     }
 
     public int[] findVerticalSeam() {
         throw new UnsupportedOperationException();
+    }
+
+    private int indexYOfSmallestElement(double[][] paths, int x, int... elems) {
+        double min = Double.POSITIVE_INFINITY;
+        int minIndex = elems[0];
+
+        for (int i : elems) {
+            if (paths[x][i] < min) {
+                min = paths[x][i];
+                minIndex = i;
+            }
+        }
+
+        return minIndex;
+    }
+
+    private double smallestOfThree(double a, double b, double c) {
+        return Math.min(a, Math.min(b, c));
     }
 
     public void removeHorizontalSeam(int[] seam) {
@@ -95,10 +152,11 @@ public class SeamCarver {
     }
 
     public static void main(String[] args) {
-        Picture p = new Picture("3x4.png");
+        Picture p = new Picture("6x5.png");
         SeamCarver s = new SeamCarver(p);
         int x = 1, y = 2;
         System.out.println(p.get(x, y).getRed() + " " + p.get(x, y).getGreen() + " " + p.get(x, y).getBlue());
         System.out.println(s.energy(x, y));
+        s.findVerticalSeam();
     }
 }
