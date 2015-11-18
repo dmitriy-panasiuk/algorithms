@@ -8,6 +8,7 @@ public class SeamCarver {
     private double[][] energies;
     private int width;
     private int height;
+    private boolean isColorsChanged;
 
     public SeamCarver(Picture picture) {
         if (picture == null) throw new NullPointerException();
@@ -15,7 +16,7 @@ public class SeamCarver {
         this.picture = new Picture(picture);
         this.width = picture.width();
         this.height = picture.height();
-        this.colors = new Color[this.width][this.height()];
+        this.colors = new Color[this.width][this.height];
         this.energies = new double[this.width][this.height()];
 
         for (int i = 0; i < this.width; i++) {
@@ -37,6 +38,17 @@ public class SeamCarver {
     }
 
     public Picture picture() {
+        if (isColorsChanged) {
+            Picture newPicture= new Picture(this.width, this.height);
+            for (int i = 0; i < this.width; i++) {
+                for (int j = 0; j < this.height; j++) {
+                    newPicture.set(i, j, colors[i][j]);
+                }
+            }
+            this.picture = newPicture;
+            this.isColorsChanged = false;
+        }
+
         return this.picture;
     }
 
@@ -91,8 +103,8 @@ public class SeamCarver {
         }
 
         for (int y = 0; y < height(); y++) {
-            if (paths[width()-1][y] <= min) {
-                min = paths[width()-1][y];
+            if (paths[width() - 1][y] <= min) {
+                min = paths[width() - 1][y];
                 indexMin = y;
             }
         }
@@ -134,8 +146,8 @@ public class SeamCarver {
         }
 
         for (int x = 0; x < width(); x++) {
-            if (paths[x][height()-1] <= min) {
-                min = paths[x][height()-1];
+            if (paths[x][height() - 1] <= min) {
+                min = paths[x][height() - 1];
                 indexMin = x;
             }
         }
@@ -199,17 +211,46 @@ public class SeamCarver {
         if (seam == null) {
             throw new NullPointerException();
         }
-        if (width() <= 1 || height() <= 1) {
+        assureValidVerticalSeam(seam);
+        Color[][] newColors = new Color[this.width() - 1][this.height()];
+
+        for (int y = 0; y < height(); y++) {
+            int currentSeam = seam[y];
+            int counter = 0;
+            for (int x = 0; x < width(); x++) {
+                if (x != currentSeam) {
+                    newColors[counter][y] = colors[x][y];
+                    counter++;
+                }
+            }
+        }
+        this.colors = newColors;
+        this.width -= 1;
+        this.isColorsChanged = true;
+    }
+
+    private void assureValidVerticalSeam(int[] seam) {
+        if (seam.length != height()) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < seam.length - 1; i++) {
+            if (seam[i] < 0 || seam[i] > width() - 1 || Math.abs(seam[i] - seam[i + 1]) > 1) {
+                throw new IllegalArgumentException();
+            }
+        }
+        if (seam[seam.length - 1] < 0 || seam[seam.length - 1] > width() - 1) {
             throw new IllegalArgumentException();
         }
     }
 
     public static void main(String[] args) {
-        Picture p = new Picture("3x4.png");
+        Picture p = new Picture("6x5.png");
         SeamCarver s = new SeamCarver(p);
         int x = 1, y = 2;
         System.out.println(p.get(x, y).getRed() + " " + p.get(x, y).getGreen() + " " + p.get(x, y).getBlue());
         System.out.println(s.energy(x, y));
-        s.findVerticalSeam();
+        int[] arr = {0, 1, 2, 3, 4};
+        s.removeVerticalSeam(arr);
+        s.picture().save("new.png");
     }
 }
