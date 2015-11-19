@@ -3,17 +3,14 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    private Picture picture;
     private Color[][] colors;
     private double[][] energies;
     private int width;
     private int height;
-    private boolean isColorsChanged;
 
     public SeamCarver(Picture picture) {
         if (picture == null) throw new NullPointerException();
 
-        this.picture = new Picture(picture);
         this.width = picture.width();
         this.height = picture.height();
         this.colors = new Color[this.width][this.height];
@@ -21,8 +18,8 @@ public class SeamCarver {
 
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
-                Color currentColor = picture.get(i, j);
-                colors[i][j] = new Color(currentColor.getRed(), currentColor.getGreen(), currentColor.getBlue());
+                colors[i][j] = new Color(picture.get(i, j).getRed(), picture.get(i, j).getGreen(),
+                        picture.get(i, j).getBlue());
             }
         }
 
@@ -30,34 +27,30 @@ public class SeamCarver {
     }
 
     private double[][] energiesFromColors() {
-        double[][] energies = new double[this.width][this.height];
+        double[][] newEnergies = new double[this.width][this.height];
 
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
                 if (i == 0 || j == 0 || i == this.width - 1 || j == this.height - 1) {
-                    energies[i][j] = 1000.0;
+                    newEnergies[i][j] = 1000.0;
                 } else {
-                    energies[i][j] = Math.sqrt(gradientX(i, j) + gradientY(i, j));
+                    newEnergies[i][j] = Math.sqrt(gradientX(i, j) + gradientY(i, j));
                 }
             }
         }
 
-        return energies;
+        return newEnergies;
     }
 
     public Picture picture() {
-        if (isColorsChanged) {
-            Picture newPicture= new Picture(this.width, this.height);
-            for (int i = 0; i < this.width; i++) {
-                for (int j = 0; j < this.height; j++) {
-                    newPicture.set(i, j, colors[i][j]);
-                }
+        Picture newPicture = new Picture(this.width, this.height);
+        for (int i = 0; i < this.width; i++) {
+            for (int j = 0; j < this.height; j++) {
+                newPicture.set(i, j, colors[i][j]);
             }
-            this.picture = newPicture;
-            this.isColorsChanged = false;
         }
 
-        return this.picture;
+        return newPicture;
     }
 
     public int width() {
@@ -94,6 +87,9 @@ public class SeamCarver {
         int indexMin = 0;
         int[] result = new int[width()];
 
+        if (height() == 1) {
+            return result;
+        }
         for (int x = 0; x < width(); x++) {
             for (int y = 0; y < height(); y++) {
                 if (x == 0) {
@@ -104,7 +100,8 @@ public class SeamCarver {
                     } else if (y == height() - 1) {
                         paths[x][y] = energies[x][y] + Math.min(paths[x - 1][y], paths[x - 1][y - 1]);
                     } else {
-                        paths[x][y] = energies[x][y] + smallestOfThree(paths[x - 1][y - 1], paths[x - 1][y], paths[x - 1][y + 1]);
+                        paths[x][y] = energies[x][y] + smallestOfThree(paths[x - 1][y - 1], paths[x - 1][y],
+                                paths[x - 1][y + 1]);
                     }
                 }
             }
@@ -137,6 +134,9 @@ public class SeamCarver {
         int indexMin = 0;
         int[] result = new int[height()];
 
+        if (width() == 1) {
+            return result;
+        }
         for (int y = 0; y < height(); y++) {
             for (int x = 0; x < width(); x++) {
                 if (y == 0) {
@@ -147,7 +147,8 @@ public class SeamCarver {
                     } else if (x == width() - 1) {
                         paths[x][y] = energies[x][y] + Math.min(paths[x][y - 1], paths[x - 1][y - 1]);
                     } else {
-                        paths[x][y] = energies[x][y] + smallestOfThree(paths[x - 1][y - 1], paths[x][y - 1], paths[x + 1][y - 1]);
+                        paths[x][y] = energies[x][y] + smallestOfThree(paths[x - 1][y - 1], paths[x][y - 1],
+                                paths[x + 1][y - 1]);
                     }
                 }
             }
@@ -227,7 +228,6 @@ public class SeamCarver {
         this.colors = newColors;
         this.height -= 1;
         this.energies = energiesFromColors();
-        this.isColorsChanged = true;
     }
 
     public void removeVerticalSeam(int[] seam) {
@@ -250,7 +250,6 @@ public class SeamCarver {
         this.colors = newColors;
         this.width -= 1;
         this.energies = energiesFromColors();
-        this.isColorsChanged = true;
     }
 
     private void assureValidVerticalSeam(int[] seam) {
@@ -282,11 +281,12 @@ public class SeamCarver {
     }
 
     public static void main(String[] args) {
-        Picture p = new Picture("6x5.png");
+        Picture p = new Picture("1x8.png");
         SeamCarver s = new SeamCarver(p);
-        int[] arr = {1, 1, 1, 1, 1, 1};
+        /*int[] arr = {1, 1, 1, 1, 1, 1};
         s.removeHorizontalSeam(arr);
         s.removeHorizontalSeam(arr);
-        s.picture().save("new.png");
+        s.picture().save("new.png");*/
+        s.findVerticalSeam();
     }
 }
