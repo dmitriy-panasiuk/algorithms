@@ -26,6 +26,12 @@ public class SeamCarver {
             }
         }
 
+        this.energies = energiesFromColors();
+    }
+
+    private double[][] energiesFromColors() {
+        double[][] energies = new double[this.width][this.height];
+
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
                 if (i == 0 || j == 0 || i == this.width - 1 || j == this.height - 1) {
@@ -35,6 +41,8 @@ public class SeamCarver {
                 }
             }
         }
+
+        return energies;
     }
 
     public Picture picture() {
@@ -66,16 +74,16 @@ public class SeamCarver {
 
     private double gradientX(int x, int y) {
         double dR = Math.abs(colors[x - 1][y].getRed() - colors[x + 1][y].getRed());
-        double dG = Math.abs(picture.get(x - 1, y).getGreen() - picture.get(x + 1, y).getGreen());
-        double dB = Math.abs(picture.get(x - 1, y).getBlue() - picture.get(x + 1, y).getBlue());
+        double dG = Math.abs(colors[x - 1][y].getGreen() - colors[x + 1][y].getGreen());
+        double dB = Math.abs(colors[x - 1][y].getBlue() - colors[x + 1][y].getBlue());
 
         return dR * dR + dG * dG + dB * dB;
     }
 
     private double gradientY(int x, int y) {
-        double dR = Math.abs(picture.get(x, y - 1).getRed() - picture.get(x, y + 1).getRed());
-        double dG = Math.abs(picture.get(x, y - 1).getGreen() - picture.get(x, y + 1).getGreen());
-        double dB = Math.abs(picture.get(x, y - 1).getBlue() - picture.get(x, y + 1).getBlue());
+        double dR = Math.abs(colors[x][y - 1].getRed() - colors[x][y + 1].getRed());
+        double dG = Math.abs(colors[x][y - 1].getGreen() - colors[x][y + 1].getGreen());
+        double dB = Math.abs(colors[x][y - 1].getBlue() - colors[x][y + 1].getBlue());
 
         return dR * dR + dG * dG + dB * dB;
     }
@@ -103,7 +111,7 @@ public class SeamCarver {
         }
 
         for (int y = 0; y < height(); y++) {
-            if (paths[width() - 1][y] <= min) {
+            if (paths[width() - 1][y] < min) {
                 min = paths[width() - 1][y];
                 indexMin = y;
             }
@@ -146,7 +154,7 @@ public class SeamCarver {
         }
 
         for (int x = 0; x < width(); x++) {
-            if (paths[x][height() - 1] <= min) {
+            if (paths[x][height() - 1] < min) {
                 min = paths[x][height() - 1];
                 indexMin = x;
             }
@@ -202,9 +210,24 @@ public class SeamCarver {
         if (seam == null) {
             throw new NullPointerException();
         }
-        if (width() <= 1 || height() <= 1) {
-            throw new IllegalArgumentException();
+        assureValidHorizontalSeam(seam);
+        Color[][] newColors = new Color[this.width()][this.height() - 1];
+
+        for (int x = 0; x < width(); x++) {
+            int currentSeam = seam[x];
+            int counter = 0;
+            for (int y = 0; y < height(); y++) {
+                if (y != currentSeam) {
+                    newColors[x][counter] = colors[x][y];
+                    counter++;
+                }
+            }
         }
+
+        this.colors = newColors;
+        this.height -= 1;
+        this.energies = energiesFromColors();
+        this.isColorsChanged = true;
     }
 
     public void removeVerticalSeam(int[] seam) {
@@ -226,6 +249,7 @@ public class SeamCarver {
         }
         this.colors = newColors;
         this.width -= 1;
+        this.energies = energiesFromColors();
         this.isColorsChanged = true;
     }
 
@@ -243,14 +267,26 @@ public class SeamCarver {
         }
     }
 
+    private void assureValidHorizontalSeam(int[] seam) {
+        if (seam.length != width()) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < seam.length - 1; i++) {
+            if (seam[i] < 0 || seam[i] > height() - 1 || Math.abs(seam[i] - seam[i + 1]) > 1) {
+                throw new IllegalArgumentException();
+            }
+        }
+        if (seam[seam.length - 1] < 0 || seam[seam.length - 1] > height() - 1) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     public static void main(String[] args) {
         Picture p = new Picture("6x5.png");
         SeamCarver s = new SeamCarver(p);
-        int x = 1, y = 2;
-        System.out.println(p.get(x, y).getRed() + " " + p.get(x, y).getGreen() + " " + p.get(x, y).getBlue());
-        System.out.println(s.energy(x, y));
-        int[] arr = {0, 1, 2, 3, 4};
-        s.removeVerticalSeam(arr);
+        int[] arr = {1, 1, 1, 1, 1, 1};
+        s.removeHorizontalSeam(arr);
+        s.removeHorizontalSeam(arr);
         s.picture().save("new.png");
     }
 }
