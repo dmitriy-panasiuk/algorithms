@@ -3,7 +3,7 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    private Color[][] colors;
+    private int[][] colorsRGB;
     private int width;
     private int height;
 
@@ -12,11 +12,11 @@ public class SeamCarver {
 
         this.width = picture.width();
         this.height = picture.height();
-        this.colors = new Color[this.width][this.height];
+        this.colorsRGB = new int[this.width][this.height];
 
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
-                colors[i][j] = new Color(picture.get(i, j).getRed(), picture.get(i, j).getGreen(),
+                colorsRGB[i][j] = rgbFromInt(picture.get(i, j).getRed(), picture.get(i, j).getGreen(),
                         picture.get(i, j).getBlue());
             }
         }
@@ -26,7 +26,8 @@ public class SeamCarver {
         Picture newPicture = new Picture(this.width, this.height);
         for (int i = 0; i < this.width; i++) {
             for (int j = 0; j < this.height; j++) {
-                newPicture.set(i, j, colors[i][j]);
+                newPicture.set(i, j, new Color(getRed(colorsRGB[i][j]), getGreen(colorsRGB[i][j]),
+                        getBlue(colorsRGB[i][j])));
             }
         }
 
@@ -52,17 +53,17 @@ public class SeamCarver {
     }
 
     private double gradientX(int x, int y) {
-        double dR = Math.abs(colors[x - 1][y].getRed() - colors[x + 1][y].getRed());
-        double dG = Math.abs(colors[x - 1][y].getGreen() - colors[x + 1][y].getGreen());
-        double dB = Math.abs(colors[x - 1][y].getBlue() - colors[x + 1][y].getBlue());
+        double dR = Math.abs(getRed(colorsRGB[x - 1][y]) - getRed(colorsRGB[x + 1][y]));
+        double dG = Math.abs(getGreen(colorsRGB[x - 1][y]) - getGreen(colorsRGB[x + 1][y]));
+        double dB = Math.abs(getBlue(colorsRGB[x - 1][y]) - getBlue(colorsRGB[x + 1][y]));
 
         return dR * dR + dG * dG + dB * dB;
     }
 
     private double gradientY(int x, int y) {
-        double dR = Math.abs(colors[x][y - 1].getRed() - colors[x][y + 1].getRed());
-        double dG = Math.abs(colors[x][y - 1].getGreen() - colors[x][y + 1].getGreen());
-        double dB = Math.abs(colors[x][y - 1].getBlue() - colors[x][y + 1].getBlue());
+        double dR = Math.abs(getRed(colorsRGB[x][y - 1]) - getRed(colorsRGB[x][y + 1]));
+        double dG = Math.abs(getGreen(colorsRGB[x][y - 1]) - getGreen(colorsRGB[x][y + 1]));
+        double dB = Math.abs(getBlue(colorsRGB[x][y - 1]) - getBlue(colorsRGB[x][y + 1]));
 
         return dR * dR + dG * dG + dB * dB;
     }
@@ -200,20 +201,20 @@ public class SeamCarver {
             throw new NullPointerException();
         }
         assureValidHorizontalSeam(seam);
-        Color[][] newColors = new Color[this.width()][this.height() - 1];
+        int[][] newColorsRGB = new int[this.width()][this.height() - 1];
 
         for (int x = 0; x < width(); x++) {
             int currentSeam = seam[x];
             int counter = 0;
             for (int y = 0; y < height(); y++) {
                 if (y != currentSeam) {
-                    newColors[x][counter] = colors[x][y];
+                    newColorsRGB[x][counter] = colorsRGB[x][y];
                     counter++;
                 }
             }
         }
 
-        this.colors = newColors;
+        this.colorsRGB = newColorsRGB;
         this.height -= 1;
     }
 
@@ -222,19 +223,19 @@ public class SeamCarver {
             throw new NullPointerException();
         }
         assureValidVerticalSeam(seam);
-        Color[][] newColors = new Color[this.width() - 1][this.height()];
+        int[][] newColorsRGB = new int[this.width() - 1][this.height()];
 
         for (int y = 0; y < height(); y++) {
             int currentSeam = seam[y];
             int counter = 0;
             for (int x = 0; x < width(); x++) {
                 if (x != currentSeam) {
-                    newColors[counter][y] = colors[x][y];
+                    newColorsRGB[counter][y] = colorsRGB[x][y];
                     counter++;
                 }
             }
         }
-        this.colors = newColors;
+        this.colorsRGB = newColorsRGB;
         this.width -= 1;
     }
 
@@ -266,14 +267,34 @@ public class SeamCarver {
         }
     }
 
+    private int rgbFromInt(int red, int green, int blue) {
+        return  ((red & 0xFF) << 16) | ((green & 0xFF) << 8)  | ((blue & 0xFF));
+    }
+
+    private int getRed(int rgb) {
+        return (rgb >> 16) & 0xFF;
+    }
+
+    private int getGreen(int rgb) {
+        return (rgb >> 8) & 0xFF;
+    }
+
+    private int getBlue(int rgb) {
+        return rgb & 0xFF;
+    }
+
     public static void main(String[] args) {
         Picture p = new Picture("6x5.png");
         SeamCarver s = new SeamCarver(p);
-        System.out.println(s.energy(-1, 4));
-        /*int[] arr = {1, 1, 1, 1, 1, 1};
+        /*System.out.println(s.energy(-1, 4));
+        int[] arr = {1, 1, 1, 1, 1, 1};
         s.removeHorizontalSeam(arr);
         s.removeHorizontalSeam(arr);
-        s.picture().save("new.png");*/
-        s.findVerticalSeam();
+        s.picture().save("new.png");
+        s.findVerticalSeam();*/
+        int rgb = s.rgbFromInt(150, 100, 50);
+        System.out.println(s.getRed(rgb));
+        System.out.println(s.getGreen(rgb));
+        System.out.println(s.getBlue(rgb));
     }
 }
