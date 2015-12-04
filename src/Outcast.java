@@ -9,14 +9,14 @@ public class Outcast {
         int maxDistance = 0, currentDistance;
         String outcast = "";
 
-        for (int i = 0; i < nouns.length; i++) {
+        for (String noun : nouns) {
             currentDistance = 0;
-            for (int j = 0; j < nouns.length; j++) {
-                currentDistance += net.distance(nouns[i], nouns[j]);
+            for (String noun1 : nouns) {
+                currentDistance += net.distance(noun, noun1);
             }
             if (currentDistance > maxDistance) {
                 maxDistance = currentDistance;
-                outcast = nouns[i];
+                outcast = noun;
             }
         }
 

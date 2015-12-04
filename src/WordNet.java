@@ -1,3 +1,6 @@
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,13 +9,14 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class WordNet {
-    private List<String> synsetsList = new ArrayList<String>();
-    private Map<String, Set<Integer>> nouns = new HashMap<String, Set<Integer>>();
-    private Digraph graph;
+    private List<String> synsetsList = new ArrayList<>();
+    private Map<String, Set<Integer>> nouns = new HashMap<>();
     private SAP sap;
 
     public WordNet(String synsets, String hypernyms) {
         if (synsets == null || hypernyms == null) throw new NullPointerException();
+
+        Digraph graph;
         In inSyn = new In(synsets);
         In inHyper = new In(hypernyms);
         String line;
@@ -28,7 +32,7 @@ public class WordNet {
                     Set<Integer> tempSet = nouns.get(noun);
                     tempSet.add(Integer.parseInt(data[0]));
                 } else {
-                    Set<Integer> tempSet = new HashSet<Integer>();
+                    Set<Integer> tempSet = new HashSet<>();
                     tempSet.add(Integer.parseInt(data[0]));
                     nouns.put(noun, tempSet);
                 }
@@ -44,7 +48,22 @@ public class WordNet {
                 graph.addEdge(Integer.parseInt(data[0]), Integer.parseInt(data[i]));
             }
         }
+        if (!hasRoots(graph)) {
+            throw new IllegalArgumentException();
+        }
         sap = new SAP(graph);
+    }
+
+    private boolean hasRoots(Digraph digraph) {
+        int rootNumber = 0;
+
+        for (int i = 0; i < digraph.V(); i++) {
+            if (digraph.outdegree(i) == 0) {
+                rootNumber++;
+            }
+        }
+
+        return rootNumber == 1;
     }
 
     public Iterable<String> nouns() {
@@ -53,23 +72,25 @@ public class WordNet {
 
     public boolean isNoun(String word) {
         if (word == null) throw new NullPointerException();
+
         return nouns.containsKey(word);
     }
 
     public int distance(String nounA, String nounB) {
         if (nounA == null || nounB == null) throw new NullPointerException();
         if (nouns.get(nounA) == null || nouns.get(nounB) == null) throw new IllegalArgumentException();
+
         return sap.length(nouns.get(nounA), nouns.get(nounB));
     }
 
     public String sap(String nounA, String nounB) {
         if (nounA == null || nounB == null) throw new NullPointerException();
         if (nouns.get(nounA) == null || nouns.get(nounB) == null) throw new IllegalArgumentException();
+
         return synsetsList.get(sap.ancestor(nouns.get(nounA), nouns.get(nounB)));
     }
 
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("synsets.txt", "hypernyms.txt");
-        System.out.println(wordNet.distance("ololo", "black_marlin"));
+
     }
 }
