@@ -52,18 +52,23 @@ public class BaseballElimination {
     }
 
     public int wins(String team) {
+        validateTeam(team);
         return wins[teams.get(team)];
     }
 
     public int losses(String team) {
+        validateTeam(team);
         return loses[teams.get(team)];
     }
 
     public int remaining(String team) {
+        validateTeam(team);
         return remaining[teams.get(team)];
     }
 
     public int against(String team1, String team2) {
+        validateTeam(team1);
+        validateTeam(team2);
         return games[teams.get(team1)][teams.get(team2)];
     }
 
@@ -79,7 +84,14 @@ public class BaseballElimination {
         return false;
     }
 
+    private void validateTeam(String team) {
+        if (teams.get(team) == null) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     public boolean isEliminated(String team) {
+        validateTeam(team);
         int teamIndex = teams.get(team);
         int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
         int vertices = pairs + 2 + numberOfTeams - 1;
@@ -147,6 +159,7 @@ public class BaseballElimination {
     }
 
     public Iterable<String> certificateOfElimination(String team) {
+        validateTeam(team);
         List<String> result = new ArrayList<>();
         int teamIndex = teams.get(team);
         int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
@@ -172,7 +185,7 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination division = new BaseballElimination("teams4a.txt");
+        BaseballElimination division = new BaseballElimination(args[0]);
         for (String team : division.teams()) {
             if (division.isEliminated(team)) {
                 StdOut.print(team + " is eliminated by the subset R = { ");
