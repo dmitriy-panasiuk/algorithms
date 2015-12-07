@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class BaseballElimination {
     private int numberOfTeams;
-    FordFulkerson ff;
+    private FordFulkerson ff;
     private Map<String, Integer> teams = new HashMap<>();
     private String[] teamNames;
     private int[] wins;
