@@ -1,7 +1,8 @@
-import edu.princeton.cs.algs4.FlowEdge;
-import edu.princeton.cs.algs4.FlowNetwork;
 import edu.princeton.cs.algs4.FordFulkerson;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.FlowEdge;
+import edu.princeton.cs.algs4.FlowNetwork;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,9 +11,8 @@ import java.util.Map;
 
 public class BaseballElimination {
     private int numberOfTeams;
-    private boolean isEliminated;
     FordFulkerson ff;
-    private Map<String, Integer> teams = new HashMap<String, Integer>();
+    private Map<String, Integer> teams = new HashMap<>();
     private String[] teamNames;
     private int[] wins;
     private int[] loses;
@@ -67,15 +67,26 @@ public class BaseballElimination {
         return games[teams.get(team1)][teams.get(team2)];
     }
 
+    private boolean isTrivialyEliminated(String team) {
+        int teamIndex = teams.get(team);
+
+        for (int ii = 0; ii < numberOfTeams; ii++) {
+            if (wins[teamIndex] + remaining[teamIndex] < wins[ii]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public boolean isEliminated(String team) {
         int teamIndex = teams.get(team);
         int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
         int vertices = pairs + 2 + numberOfTeams - 1;
         int i = 0, j, k = 1;
-        for (int ii = 0; ii < numberOfTeams; ii++) {
-            if (wins[teamIndex] + remaining[teamIndex] < wins[ii]) {
-                return true;
-            }
+
+        if (isTrivialyEliminated(team)) {
+            return true;
         }
 
         FlowNetwork network = new FlowNetwork(vertices);
@@ -136,11 +147,18 @@ public class BaseballElimination {
     }
 
     public Iterable<String> certificateOfElimination(String team) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         int teamIndex = teams.get(team);
         int pairs = (numberOfTeams * numberOfTeams - numberOfTeams) / 2 - numberOfTeams + 1;
         int vertices = pairs + 2 + numberOfTeams - 1;
-        if (isEliminated(team)) {
+
+        if (isTrivialyEliminated(team)) {
+            for (int ii = 0; ii < numberOfTeams; ii++) {
+                if (wins[teamIndex] + remaining[teamIndex] < wins[ii]) {
+                    result.add(teamNames[ii]);
+                }
+            }
+        } else if (isEliminated(team)) {
             for (int i = pairs + 1; i < vertices - 1; i++) {
                 if (ff.inCut(i)) {
                     result.add(teamNames[getTeamIndexReverse(i, teamIndex)]);
@@ -154,8 +172,18 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination b = new BaseballElimination("teams5.txt");
-        //System.out.println(b.isEliminated("Detroit"));
-        System.out.println(b.certificateOfElimination("Detroit"));
+        BaseballElimination division = new BaseballElimination("teams4a.txt");
+        for (String team : division.teams()) {
+            if (division.isEliminated(team)) {
+                StdOut.print(team + " is eliminated by the subset R = { ");
+                for (String t : division.certificateOfElimination(team)) {
+                    StdOut.print(t + " ");
+                }
+                StdOut.println("}");
+            }
+            else {
+                StdOut.println(team + " is not eliminated");
+            }
+        }
     }
 }
