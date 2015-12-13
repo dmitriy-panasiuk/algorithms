@@ -1,46 +1,53 @@
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.TrieST;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class BoggleSolver {
-    private TrieST<Integer> dict = new TrieST<>();
+    private TrieDP dict = new TrieDP();
     private int boardDimension;
 
     public BoggleSolver(String[] dictionary) {
         for (String word : dictionary) {
-            dict.put(word, score(word.length()));
+            dict.put(word);
         }
     }
 
     public Iterable<String> getAllValidWords(BoggleBoard board) {
-        Queue<String> queue = new Queue<>();
+        Set<String> queue = new HashSet<>();
         String s = "";
         this.boardDimension = board.cols();
         boolean[] marked = new boolean[boardDimension * boardDimension];
 
         for (int i = 0; i < boardDimension; i++) {
             for (int j = 0; j < boardDimension; j++) {
-                dfs(board, marked, coordsToInt(i, j), s + board.getLetter(i, j), queue);
+                String letter = "" + board.getLetter(i, j);
+                if (letter.equals("Q")) {
+                    letter += "U";
+                }
+                dfs(board, marked, coordsToInt(i, j), s + letter, queue);
             }
         }
 
-        return null;
+        return queue;
     }
 
-    private void dfs(BoggleBoard board, boolean[] marked, int v, String s, Queue<String> queue) {
+    private void dfs(BoggleBoard board, boolean[] marked, int v, String s, Set<String> queue) {
         marked[v] = true;
-        if (!iterableIsEmpty(dict.keysWithPrefix(s))) {
-            for (Integer neighbour : neighbours(v)) {
+        if (dict.hasKeysWithPrefix(s)) {
+            if (s.length() > 2 && dict.contains(s)) {
+                queue.add(s);
+            }
+            for (int neighbour : neighbours(v)) {
                 if (!marked[neighbour]) {
-                    if (dict.contains(s)) {
-                        queue.enqueue(s);
+                    String letter = "" + board.getLetter(neighbour / boardDimension, neighbour % boardDimension);
+                    if (letter.equals("Q")) {
+                        letter += "U";
                     }
-                    dfs(board, marked, neighbour, s + board.getLetter(neighbour / boardDimension, neighbour % boardDimension), queue);
+                    dfs(board, marked, neighbour, s + letter, queue);
                 }
             }
         }
@@ -49,9 +56,10 @@ public class BoggleSolver {
     }
 
     public int scoreOf(String word) {
-        Integer score = dict.get(word);
-        if (score == null) return 0;
-        return score;
+        if (dict.contains(word)) {
+            return score(word.length());
+        }
+        return 0;
     }
 
     private int score(int wordLength) {
@@ -100,26 +108,65 @@ public class BoggleSolver {
         return result;
     }
 
-    private boolean iterableIsEmpty(Iterable iterable) {
-        for (Object i : iterable) return false;
-
-        return true;
-    }
-
     public static void main(String[] args) {
-        In in = new In("test.txt");
+        In in = new In("dictionary-yawl.txt");
         String[] dictionary = in.readAllStrings();
         BoggleSolver solver = new BoggleSolver(dictionary);
-        //solver.getAllValidWords(new BoggleBoard());
-        BoggleBoard b = new BoggleBoard();
-        solver.getAllValidWords(b);
-        /*BoggleBoard board = new BoggleBoard(args[1]);
+        BoggleBoard board = new BoggleBoard("board-points26539.txt");
+        System.out.println(board);
         int score = 0;
-        for (String word : solver.getAllValidWords(board))
-        {
+        for (String word : solver.getAllValidWords(board)) {
             StdOut.println(word);
             score += solver.scoreOf(word);
         }
-        StdOut.println("Score = " + score);*/
+        StdOut.println("Score = " + score);
+    }
+}
+
+class TrieDP {
+    private static final int R = 26;
+    private Node root = new Node();
+
+    public void put(String key) {
+        root = put(root, key, 0);
+    }
+
+    private Node put(Node x, String key, int d) {
+        if (x == null) x = new Node();
+        if (d == key.length()) {
+            x.value = true;
+            return x;
+        }
+        char c = (char) (key.charAt(d) - 'A');
+        x.next[c] = put(x.next[c], key, d + 1);
+
+        return x;
+    }
+
+    public boolean contains(String key) {
+        return get(root, key, 0);
+    }
+
+    private boolean get(Node x, String key, int d) {
+        if (x == null) return false;
+        if (d == key.length()) return x.value;
+        char c = (char) (key.charAt(d) - 'A');
+        return get(x.next[c], key, d + 1);
+    }
+
+    private static class Node {
+        private boolean value;
+        private Node[] next = new Node[R];
+    }
+
+    public boolean hasKeysWithPrefix(String prefix) {
+        return hasKeysWithPrefix(root, prefix, 0);
+    }
+
+    private boolean hasKeysWithPrefix(Node x, String prefix, int d) {
+        if (x == null) return false;
+        if (d == prefix.length()) return true;
+        char c = (char) (prefix.charAt(d) - 'A');
+        return hasKeysWithPrefix(x.next[c], prefix, d + 1);
     }
 }
