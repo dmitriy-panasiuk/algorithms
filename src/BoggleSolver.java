@@ -1,13 +1,13 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.SET;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 
 public class BoggleSolver {
     private TrieDP dict = new TrieDP();
+    private List<List<Integer>> neighbours;
     private int boardDimensionRows;
     private int boardDimensionCols;
 
@@ -18,11 +18,14 @@ public class BoggleSolver {
     }
 
     public Iterable<String> getAllValidWords(BoggleBoard board) {
-        Set<String> queue = new HashSet<>();
+        SET<String> queue = new SET<>();
         String s = "";
         this.boardDimensionRows = board.rows();
         this.boardDimensionCols = board.cols();
+        this.neighbours = new ArrayList<>(boardDimensionRows * boardDimensionCols);
         boolean[] marked = new boolean[boardDimensionRows * boardDimensionCols];
+
+        precomputeNeighbours();
 
         for (int i = 0; i < boardDimensionRows; i++) {
             for (int j = 0; j < boardDimensionCols; j++) {
@@ -37,13 +40,13 @@ public class BoggleSolver {
         return queue;
     }
 
-    private void dfs(BoggleBoard board, boolean[] marked, int v, String s, Set<String> queue) {
+    private void dfs(BoggleBoard board, boolean[] marked, int v, String s, SET<String> queue) {
         marked[v] = true;
         if (dict.hasKeysWithPrefix(s)) {
             if (s.length() > 2 && dict.contains(s)) {
                 queue.add(s);
             }
-            for (int neighbour : neighbours(v)) {
+            for (int neighbour : neighbours.get(v)) {
                 if (!marked[neighbour]) {
                     String letter = "" + board.getLetter(neighbour / boardDimensionCols, neighbour % boardDimensionCols);
                     if (letter.equals("Q")) {
@@ -78,7 +81,13 @@ public class BoggleSolver {
         return i * boardDimensionCols + j;
     }
 
-    private Iterable<Integer> neighbours(int index) {
+    private void precomputeNeighbours() {
+        for (int index = 0; index < boardDimensionRows * boardDimensionCols; index++) {
+            this.neighbours.add(index, neighbours(index));
+        }
+    }
+
+    private List<Integer> neighbours(int index) {
         List<Integer> result = new ArrayList<>();
 
         int i = index / boardDimensionCols, j = index % boardDimensionCols;
