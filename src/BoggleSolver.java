@@ -8,7 +8,8 @@ import java.util.Set;
 
 public class BoggleSolver {
     private TrieDP dict = new TrieDP();
-    private int boardDimension;
+    private int boardDimensionRows;
+    private int boardDimensionCols;
 
     public BoggleSolver(String[] dictionary) {
         for (String word : dictionary) {
@@ -19,11 +20,12 @@ public class BoggleSolver {
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         Set<String> queue = new HashSet<>();
         String s = "";
-        this.boardDimension = board.cols();
-        boolean[] marked = new boolean[boardDimension * boardDimension];
+        this.boardDimensionRows = board.rows();
+        this.boardDimensionCols = board.cols();
+        boolean[] marked = new boolean[boardDimensionRows * boardDimensionCols];
 
-        for (int i = 0; i < boardDimension; i++) {
-            for (int j = 0; j < boardDimension; j++) {
+        for (int i = 0; i < boardDimensionRows; i++) {
+            for (int j = 0; j < boardDimensionCols; j++) {
                 String letter = "" + board.getLetter(i, j);
                 if (letter.equals("Q")) {
                     letter += "U";
@@ -43,7 +45,7 @@ public class BoggleSolver {
             }
             for (int neighbour : neighbours(v)) {
                 if (!marked[neighbour]) {
-                    String letter = "" + board.getLetter(neighbour / boardDimension, neighbour % boardDimension);
+                    String letter = "" + board.getLetter(neighbour / boardDimensionCols, neighbour % boardDimensionCols);
                     if (letter.equals("Q")) {
                         letter += "U";
                     }
@@ -73,34 +75,34 @@ public class BoggleSolver {
     }
 
     private int coordsToInt(int i, int j) {
-        return i * boardDimension + j;
+        return i * boardDimensionCols + j;
     }
 
     private Iterable<Integer> neighbours(int index) {
         List<Integer> result = new ArrayList<>();
 
-        int i = index / boardDimension, j = index % boardDimension;
+        int i = index / boardDimensionCols, j = index % boardDimensionCols;
         if (i > 0) {
             if (j > 0) {
                 result.add(coordsToInt(i - 1, j - 1));
             }
             result.add(coordsToInt(i - 1, j));
-            if (j < boardDimension - 1) {
+            if (j < boardDimensionCols - 1) {
                 result.add(coordsToInt(i - 1, j + 1));
             }
         }
         if (j > 0) {
             result.add(coordsToInt(i, j - 1));
         }
-        if (j < boardDimension - 1) {
+        if (j < boardDimensionCols - 1) {
             result.add(coordsToInt(i, j + 1));
         }
-        if (i < boardDimension - 1) {
+        if (i < boardDimensionRows - 1) {
             if (j > 0) {
                 result.add(coordsToInt(i + 1, j - 1));
             }
             result.add(coordsToInt(i + 1, j));
-            if (j < boardDimension - 1) {
+            if (j < boardDimensionCols - 1) {
                 result.add(coordsToInt(i + 1, j + 1));
             }
         }
@@ -112,8 +114,10 @@ public class BoggleSolver {
         In in = new In("dictionary-yawl.txt");
         String[] dictionary = in.readAllStrings();
         BoggleSolver solver = new BoggleSolver(dictionary);
-        BoggleBoard board = new BoggleBoard("board-points26539.txt");
+        BoggleBoard board = new BoggleBoard("board-antidisestablishmentarianisms.txt");
         System.out.println(board);
+        System.out.println(board.cols());
+        System.out.println(board.rows());
         int score = 0;
         for (String word : solver.getAllValidWords(board)) {
             StdOut.println(word);
